@@ -1,0 +1,19 @@
+# Backend için
+kitap-paylasim-backend/venv/
+kitap-paylasim-backend/.env
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.pytest_cache/
+
+#Frontend için
+node_modules/
+.next/
+out/
+.env*.local
+
+# İşletim sistemi ve IDE dosyaları
+.DS_Store
+.vscode/
+.idea/

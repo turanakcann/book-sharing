@@ -1,0 +1,10 @@
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    isbn VARCHAR(13) UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    publisher VARCHAR(255),
+    page_number INT,                  -- Alışkanlık ve leaderboard için kritik
+    cover_image_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

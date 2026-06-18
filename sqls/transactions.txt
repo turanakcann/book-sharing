@@ -1,0 +1,11 @@
+CREATE TYPE transaction_status_enum AS ENUM ('pending', 'shipping', 'completed', 'cancelled');
+
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    listing_id INT REFERENCES listings(id) ON DELETE RESTRICT,
+    buyer_id INT REFERENCES users(id) ON DELETE RESTRICT,  -- Kitabı alan/talep eden kişi
+    status transaction_status_enum DEFAULT 'pending',
+    tracking_number VARCHAR(100),       -- Kargo takip numarası
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
