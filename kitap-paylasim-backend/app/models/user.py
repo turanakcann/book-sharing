@@ -4,7 +4,7 @@ from app.db.session import Base
 class User(Base):
     __tablename__ = "users"  # Veritabanındaki tablo adı
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True) #Otomatik artan birincil anahtar (Primary Key) ve indekslenmiş
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
@@ -13,4 +13,4 @@ class User(Base):
     birth_date = Column(Date, nullable=False)
     city = Column(String(80), nullable=False)
     district = Column(String(80), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, server_default=func.now()) #Otomatik olarak oluşturulma tarihi eklenir

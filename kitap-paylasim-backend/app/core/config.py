@@ -15,6 +15,10 @@ class Settings:
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "postgres")
     
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "gizli_anahtar_yok")
+    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1440))  # Varsayılan olarak 24 saat
+    
     @property
     def DATABASE_URL(self) -> str:
         # SQLAlchemy'nin PostgreSQL ile konuşabilmesi için bağlantı dizesi (Connection String)

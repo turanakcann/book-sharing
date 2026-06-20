@@ -7,6 +7,9 @@ from app.db.session import engine, Base, get_db
 # DİKKAT: Modelleri burada import etmezsek SQLAlchemy tabloları oluşturmaz!
 from app.models.user import User
 
+# YENİ EKLENEN: Yazdığımız router'ı içeri aktarıyoruz
+from app.api.v1 import users, auth
+
 # Veritabanı tablolarını otomatik oluşturma (Sihirli komut)
 Base.metadata.create_all(bind=engine)
 
@@ -16,6 +19,10 @@ app = FastAPI(
     version = "1.0.0",
     description = "Okuyan, paylaşan ve kültürlenen bir topluluk için API altyapısı"
 )
+
+# YENİ EKLENEN: Router(Users)'ı ana uygulamaya bağlıyoruz
+app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 
 @app.get("/")
 def read_root():

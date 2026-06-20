@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date
 
 # Ortak Özellikler: Hem oluştururken hem de geri dönerken ortak olan alanlar
@@ -13,7 +13,10 @@ class UserBase(BaseModel):
     
 # İstek Şeması (Request): Kullanıcı kayıt olurken frontend'den bize gelecek veri
 class UserCreate(UserBase):
-    password: str
+    
+    # Şifre minimum 8, maksimum 50 karakter olabilir diyoruz.
+    # Böylece 72 byte sınırına asla takılmayız ve DoS saldırılarını engelleriz.
+    password: str = Field(..., min_length=8, max_length=50, description="Kullanıcı şifresi en az 8 karakter olmalıdır.")
 
 # Yanıt Şeması (Response): Veritabanından çekip frontend'e yollayacağımız veri
 class UserResponse(UserBase):
