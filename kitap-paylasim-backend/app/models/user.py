@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date, DateTime, func
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 
 class User(Base):
@@ -14,3 +15,6 @@ class User(Base):
     city = Column(String(80), nullable=False)
     district = Column(String(80), nullable=False)
     created_at = Column(DateTime, server_default=func.now()) #Otomatik olarak oluşturulma tarihi eklenir
+    
+    books = relationship("Book", back_populates="adder")
+    listings = relationship("Listing", back_populates="owner")

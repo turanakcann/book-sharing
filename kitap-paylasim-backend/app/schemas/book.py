@@ -7,7 +7,7 @@ class BookBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Kitabın Tam Adı")
     author: str = Field(..., min_length=1, max_length=255, description="Yazarın Adı")
     isbn: str = Field(..., min_length=10, max_length=13, description="Uluslararası Standart Kitap Numarası (ISBN-10 veya ISBN-13)")
-    published_year: Optional[int] = Field(None, ge=1000, le=datetime.utcnow().year(), description="Basım Yılı")
+    published_year: Optional[int] = Field(None, ge=1000, le=datetime.utcnow().year, description="Basım Yılı")
     page_count: Optional[int] = Field(None, gt=0, description="Sayfa Sayısı")
     description: Optional[str] = Field(None, max_length=1000)
 
