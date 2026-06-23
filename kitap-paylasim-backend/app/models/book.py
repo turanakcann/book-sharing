@@ -20,6 +20,8 @@ class Book(Base):
     # "Bu kitabı ekleyen kişinin ID'si, users tablosundaki id sütunundan gelir" diyoruz.
     added_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
+    cover_image_url = Column(String(255), nullable=True)
+    
     created_at = Column(DateTime, server_default=func.now())
     
     # İLİŞKİ (RELATIONSHIP) SİHRİ:

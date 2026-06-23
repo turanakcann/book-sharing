@@ -1,3 +1,5 @@
+import os
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
@@ -22,11 +24,14 @@ app = FastAPI(
     description = "Okuyan, paylaşan ve kültürlenen bir topluluk için API altyapısı"
 )
 
+os.makedirs("uploads", exist_ok=True)
+
 # YENİ EKLENEN: Router(Users)'ı ana uygulamaya bağlıyoruz
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(books.router, prefix="/api/v1/books", tags=["Books"])
 app.include_router(listings.router, prefix="/api/v1/listings", tags=["Listings"])
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 @app.get("/")
 def read_root():

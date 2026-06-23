@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from decimal import Decimal
 
+from app.schemas.book import BookResponse
+from app.schemas.user import UserResponse
+
 class ListingBase(BaseModel):
     book_id: int
     listing_type: str = Field(..., description="Bağış, Takas veya Satış")
@@ -16,6 +19,10 @@ class ListingResponse(ListingBase):
     id: int
     owner_id: int
     is_active: bool
+    
+    # Değişken isimleri (book ve owner) SQLAlchemy modelindeki relationship isimleriyle BİREBİR AYNI olmalıdır!
+    book: BookResponse
+    owner: UserResponse
     
     class Config:
         from_attributes = True

@@ -19,6 +19,7 @@ class BookCreate(BookBase):
 class BookResponse(BookBase):
     id: int
     added_by_id: int # Bu kitabı global kataloğa kimin eklediğini tutacağımız referans
+    cover_image_url: Optional[str] = None
     
     class Config:
         from_attributes = True # SQLAlchemy modelini JSON'a çevirmek için sihirli ayar
