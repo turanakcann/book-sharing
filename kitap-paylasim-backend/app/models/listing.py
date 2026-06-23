@@ -35,5 +35,5 @@ class Listing(Base):
     # Bu ilan nesnesi üzerinden kitaba ve sahibine direkt Python nesnesi olarak erişebileceğiz.
     book = relationship("Book", back_populates="listings")
     owner = relationship("User", back_populates="listings")
-    
+    requests = relationship("Request", back_populates="listing")
     

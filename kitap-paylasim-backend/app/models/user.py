@@ -18,3 +18,4 @@ class User(Base):
     
     books = relationship("Book", back_populates="adder")
     listings = relationship("Listing", back_populates="owner")
+    requests = relationship("Request", back_populates="requester")

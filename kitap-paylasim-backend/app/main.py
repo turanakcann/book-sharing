@@ -10,9 +10,10 @@ from app.db.session import engine, Base, get_db
 from app.models.user import User
 from app.models.book import Book
 from app.models.listing import Listing
+from app.models.request import Request
 
 # YENİ EKLENEN: Yazdığımız router'ı içeri aktarıyoruz
-from app.api.v1 import users, auth, books, listings
+from app.api.v1 import users, auth, books, listings, requests
 
 # Veritabanı tablolarını otomatik oluşturma (Sihirli komut)
 Base.metadata.create_all(bind=engine)
@@ -31,6 +32,7 @@ app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(books.router, prefix="/api/v1/books", tags=["Books"])
 app.include_router(listings.router, prefix="/api/v1/listings", tags=["Listings"])
+app.include_router(requests.router, prefix="/api/v1/requests", tags=["Requests"])
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 @app.get("/")
