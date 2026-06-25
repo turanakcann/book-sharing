@@ -25,3 +25,7 @@ class RequestResponse(RequestBase):
     
     class Config:
         from_attributes = True # SQLAlchemy ORM modelini JSON'a otomatik çevirir
+        
+class ContactInfoResponse(BaseModel):
+    email: str
+    message: str = Field(..., description="Kullanıcıya gösterilecek olan durum mesajı")

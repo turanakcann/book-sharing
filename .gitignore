@@ -1,6 +1,7 @@
 # Backend için
 kitap-paylasim-backend/venv/
 kitap-paylasim-backend/.env
+uploads/
 __pycache__/
 *.py[cod]
 *$py.class

@@ -6,7 +6,7 @@ from app.db.session import get_db
 from app.models.request import Request
 from app.models.user import User
 from app.models.listing import Listing
-from app.schemas.request import RequestCreate, RequestResponse, RequestUpdateStatus
+from app.schemas.request import RequestCreate, RequestResponse, RequestUpdateStatus, ContactInfoResponse
 from app.api.deps import get_current_user
 
 router = APIRouter()
@@ -99,3 +99,39 @@ def update_request_status(
     db.refresh(req)
     
     return req
+
+@router.get("/{request_id}/contact", response_model=ContactInfoResponse)
+def get_contact_info(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    req = db.query(Request).filter(Request.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Talep bulunamadı")
+    
+    if req.status != "ACCEPTED":
+        raise HTTPException(
+            status_code=403,
+            detail="İletişim bilgileri yalnızca talep kabul edildiğinde gösterilir!"
+        )
+        
+    listing = db.query(Listing).filter(Listing.id == req.listing_id).first()
+    
+    if current_user.id == listing.owner_id:
+        target_user = db.query(User).filter(User.id == listing.owner_id).first()
+        return {
+            "email": target_user.email,
+            "message": "İlanınıza talep gönderen kullanıcının e-posta adresi"
+        }
+    
+    elif current_user.id == req.requester_id:
+        target_user = db.query(User).filter(User.id == listing.owner_id).first()
+        return {
+            "email": target_user.email,
+            "message": "Kitabın sahibine ait e-posta adresi!"
+        }
+        
+    else:
+        raise HTTPException(status_code=403, detail="Bu talebin tarafı değilsiniz!")
+    
