@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.db.session import get_db
 from app.models.listing import Listing
@@ -51,15 +51,29 @@ def create_listing(
 
 @router.get("", response_model=List[ListingResponse])
 def get_all_listings(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0, description="Atlanacak kayıt sayısı (Örneğin 2.sayfa için 20)"),
+    limit: int = Query(20, ge=1, le=100, description="Bir seferde getirilecek maksimum kayıt sayısı"),
+    listing_type: Optional[str] = Query(None, description="Filtre: EXCHANGE, DONATION, SALE"),
+    condition: Optional[str] = Query(None, description="Filtre: NEW, Good, WORN"),
     db: Session = Depends(get_db)
 ):
     """
     Sistemdeki tüm AKTİF ilanları listeler. Sayfalama (Pagination) içerir.
     Token gerektirmez, herkes ilanlara bakabilir.
     """
+    # 1. TEMEL SORGUMUZU OLUŞTURUYORUZ (Henüz veritabanına gitmedi, sadece hazırlık)
+    # Satılmış veya takaslanmış (is_active=False) ilanları kimse görmek istemez
+    query = db.query(Listing).filter(Listing.is_active == True)
     
-    # DİKKAT: Sadece is_active == True olanları getiriyoruz ki satılmış kitaplar listeyi çöplüğe çevirmesin.
-    listings = db.query(Listing).filter(Listing.is_active == True).offset(skip).limit(limit).all()
+    # 2. FİLTRELERİ DİNAMİK OLARAK EKLE
+    # Eğer kullanıcı URL'den bir filtre gönderdiyse sorguya WHERE şartı olarak ekliyoruz
+    if listing_type:
+        query = query.filter(Listing.listing_type == listing_type)
+    if condition:
+        query = query.filter(Listing.condition == condition)
+    
+    # 3. SAYFALAMA VE ÇALIŞTIRMA (Offset ve Limit)
+    # Her şey hazır olduğunda offset ve limit'i ekleyip .all() ile veritabanına vuruyoruz
+    listings = query.offset(skip).limit(limit).all()
+    
     return listings

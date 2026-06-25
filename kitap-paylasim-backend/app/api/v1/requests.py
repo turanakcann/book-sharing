@@ -110,6 +110,7 @@ def get_contact_info(
     if not req:
         raise HTTPException(status_code=404, detail="Talep bulunamadı")
     
+    # 1. KONTROL: Talep henüz kabul edilmemişse kapıyı kapat!
     if req.status != "ACCEPTED":
         raise HTTPException(
             status_code=403,
@@ -118,6 +119,7 @@ def get_contact_info(
         
     listing = db.query(Listing).filter(Listing.id == req.listing_id).first()
     
+    # 2. SENARYO: Soran kişi İLAN SAHİBİ ise, ona talebi atanın e-postasını ver
     if current_user.id == listing.owner_id:
         target_user = db.query(User).filter(User.id == listing.owner_id).first()
         return {
@@ -125,6 +127,7 @@ def get_contact_info(
             "message": "İlanınıza talep gönderen kullanıcının e-posta adresi"
         }
     
+    # 3. SENARYO: Soran kişi TALEBİ ATAN ise, ona ilan sahibinin e-postasını ver
     elif current_user.id == req.requester_id:
         target_user = db.query(User).filter(User.id == listing.owner_id).first()
         return {
@@ -132,6 +135,7 @@ def get_contact_info(
             "message": "Kitabın sahibine ait e-posta adresi!"
         }
         
+    # 4. GÜVENLİK: Alakasız biri dışarıdan bu URL'i denerse kov    
     else:
         raise HTTPException(status_code=403, detail="Bu talebin tarafı değilsiniz!")
     
