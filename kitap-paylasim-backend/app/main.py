@@ -1,6 +1,7 @@
 import os
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 # Altyapı ve veritabanı bağlantıları
@@ -24,6 +25,21 @@ app = FastAPI(
     title = "Kitap Paylaşım Platformu API",
     version = "1.0.0",
     description = "Okuyan, paylaşan ve kültürlenen bir topluluk için API altyapısı"
+)
+
+# Frontend (Next.js) yerelde genellikle 3000 portunda çalışır.
+# Yarın bir gün projeyi canlıya (Vercel vb.) aldığında onun URL'ini de bu listeye ekleyebilirsin.
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Sadece bu adreslerden gelen isteklere izin ver
+    allow_credentials=True,
+    allow_methods=["*"], # GET, POST, PUT, DELETE, PATCH hepsine izin ver
+    allow_headers=["*"], # Tüm header'lara (Authorization dahil) izin ver
 )
 
 os.makedirs("uploads", exist_ok=True)
