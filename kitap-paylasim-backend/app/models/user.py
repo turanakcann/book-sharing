@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, func
+from sqlalchemy import Column, Integer, String, Date, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
@@ -19,3 +19,5 @@ class User(Base):
     books = relationship("Book", back_populates="adder")
     listings = relationship("Listing", back_populates="owner")
     requests = relationship("Request", back_populates="requester")
+    reviews_given = relationship("Review", foreign_keys="[Review.reviewer_id]", back_populates="reviewer")
+    reviews_received = relationship("Review", foreign_keys="[Review.reviewee_id]", back_populates="reviewee")
