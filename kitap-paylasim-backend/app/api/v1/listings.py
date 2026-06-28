@@ -77,3 +77,56 @@ def get_all_listings(
     listings = query.offset(skip).limit(limit).all()
     
     return listings
+
+@router.get("/my-listings", response_model=List[ListingResponse])
+def get_my_listings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    my_listings = db.query(Listing).filter(Listing.owner_id == current_user.id).all()
+    
+    return my_listings
+
+@router.get("/{listing_id}", response_model=ListingResponse)
+def get_listing_detail(listing_id: int, db: Session = Depends(get_db)):
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    
+    if not listing:
+        raise HTTPException(status_code=404, detail="İlan bulunamadı veya kaldırılmış!")
+    
+    return listing
+
+@router.delete("/{listing_id}")
+def delete_listing(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="İlan bulunamadı!")
+    
+    if listing.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Bu ilanı silme yetkiniz yok!")
+    
+    db.delete(listing)
+    db.commit()
+    return {"message":"İlan başarıyla silindi"}
+
+@router.patch("/{listing_id}/toggle-status")
+def toggle_listing_status(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="İlan bulunamadı!")
+    if listing.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Bu ilanı düzenleme yetkiniz yok!")
+    
+    listing.is_active = not listing.is_active
+    db.commit()
+    db.refresh(listing)
+    return {"message":"İlan durumu güncellendi", "is_active":listing.is_active}
+

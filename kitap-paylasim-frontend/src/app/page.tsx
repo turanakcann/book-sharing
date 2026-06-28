@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/app/lib/api";
+import Link from "next/link";
 
 // Backend'den gelen detaylı JSON yapısına göre Interface'lerimizi jilet gibi tanımlıyoruz
 interface Book {
@@ -39,7 +40,7 @@ export default function Home() {
       try {
         // Rotayı gönderdiğin veriye uygun olarak /listings olarak ayarladık
         const response = await api.get("/listings");
-        
+
         // Sadece aktif olan ilanları filtreleyip state'e atıyoruz
         const activeListings = response.data.filter((item: Listing) => item.is_active);
         setListings(activeListings);
@@ -66,7 +67,7 @@ export default function Home() {
     <main className="min-h-[calc(100vh-64px)] bg-gray-50 p-8">
       <div className="mx-auto max-w-7xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Güncel İlanlar</h1>
-        
+
         {error ? (
           <div className="rounded bg-red-100 p-4 text-red-700">{error}</div>
         ) : listings.length === 0 ? (
@@ -77,8 +78,8 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {listings.map((listing) => (
-              <div 
-                key={listing.id} 
+              <div
+                key={listing.id}
                 className="flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl border border-gray-100 relative"
               >
                 {/* İlan Tipi Rozeti (Örn: Satılık / Takaslık) */}
@@ -89,9 +90,9 @@ export default function Home() {
                 {/* Kitap Görseli */}
                 <div className="h-48 w-full bg-gray-100 flex items-center justify-center relative">
                   {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
-                    <img 
-                      src={listing.book.cover_image_url} 
-                      alt={listing.book.title} 
+                    <img
+                      src={listing.book.cover_image_url}
+                      alt={listing.book.title}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -100,7 +101,7 @@ export default function Home() {
                     </svg>
                   )}
                 </div>
-                
+
                 {/* İlan Detayları */}
                 <div className="flex flex-1 flex-col p-5">
                   <div className="flex justify-between items-start mb-1">
@@ -111,9 +112,9 @@ export default function Home() {
                       {parseFloat(listing.price) > 0 ? `${listing.price} ₺` : "Ücretsiz"}
                     </span>
                   </div>
-                  
+
                   <p className="mb-2 text-sm font-medium text-gray-600">{listing.book.author}</p>
-                  
+
                   <div className="mb-3 flex items-center gap-2">
                     <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                       Kondisyon: {listing.condition}
@@ -123,7 +124,7 @@ export default function Home() {
                   <p className="mb-4 flex-1 text-sm text-gray-500 line-clamp-2">
                     {listing.description || "Açıklama belirtilmemiş."}
                   </p>
-                  
+
                   {/* Kartın Alt Kısmı: Şehir ve Kullanıcı */}
                   <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
                     <div className="flex flex-col">
@@ -133,7 +134,12 @@ export default function Home() {
                       </span>
                     </div>
                     <button className="rounded bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-600 transition hover:bg-blue-600 hover:text-white">
-                      İncele
+                      <Link
+                        href={`/ilan/${listing.id}`}
+                        className="rounded bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-600 transition hover:bg-blue-600 hover:text-white text-center"
+                      >
+                        İncele
+                      </Link>
                     </button>
                   </div>
                 </div>

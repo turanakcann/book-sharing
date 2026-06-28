@@ -16,7 +16,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchUser = async () => {
       const token = Cookies.get("token");
-      
+
       // Token yoksa hiç backend'i yorma, direkt loading'i bitir
       if (!token) {
         setLoading(false);
@@ -52,7 +52,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          
+
           {/* Sol Kısım: Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
@@ -71,15 +71,20 @@ export default function Navbar() {
                 <span className="text-gray-700 font-medium hidden sm:block">
                   Hoş geldin, <span className="font-bold text-blue-600">{user.username}</span>
                 </span>
-                
+
                 {/* YENİ EKLENEN İLAN EKLE BUTONU */}
-                <Link 
-                  href="/ilan-ekle" 
+                <Link
+                  href="/ilan-ekle"
                   className="rounded-md bg-green-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-700 shadow-sm"
                 >
                   + İlan Ekle
                 </Link>
-
+                <Link
+                  href="/profil"
+                  className="text-gray-600 hover:text-blue-600 font-medium px-3 py-2"
+                >
+                  Profilim
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
