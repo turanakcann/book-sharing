@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+@theme {
+  --color-theme-bg: var(--theme-bg);
+  --color-theme-card: var(--theme-card);
+  --color-theme-primary: var(--theme-primary);
+  --color-theme-hover: var(--theme-hover);
+  --color-theme-text: var(--theme-text);
+  --color-theme-muted: var(--theme-muted);
+  --color-theme-border: var(--theme-border);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
+  /* 1. OKYANUS PALETİ (LIGHT THEME) */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --theme-bg: #94A68F;      /* Pride & Prejudice (Mat Adaçayı - Vintage Arkaplan) */
+    --theme-card: #D69E8D;    /* Jane Eyre Rose (Kirli Gül Kurusu - İlan Kartları) */
+    --theme-primary: #D0A54A; /* Gatsby Gold (Hardal Sarısı - Tıklanabilir Butonlar) */
+    --theme-hover: #527446;   /* Frankenstein (Orman Yeşili - Buton Hover Efektleri) */
+    --theme-text: #2A4158;    /* Moby-Dick Navy (Koyu Lacivert - Tok ve Asil Metinler) */
+    --theme-muted: #527446;   /* Frankenstein (Orman Yeşili - İkincil Metinler) */
+    --theme-border: #D0A54A;  /* Gatsby Gold (Hardal Sarısı - Şık Çerçeveler) */
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* 2. GECE GÖKYÜZÜ PALETİ (DARK THEME) */
+  .dark {
+    --theme-bg: #14151C;
+    --theme-card: #1E2A4E;
+    --theme-primary: #48608F;
+    --theme-hover: #8898C5;
+    --theme-text: #D6C5D4;
+    --theme-muted: #8898C5;
+    --theme-border: #343335;
+  }
+
+  /* Tüm gövdenin varsayılan rengini temaya bağla */
+  body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 }

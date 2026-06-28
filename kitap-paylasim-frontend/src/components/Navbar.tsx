@@ -1,109 +1,83 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import api from "@/app/lib/api";
 import Cookies from "js-cookie";
+// Tema kontrolcüsünü içeri alıyoruz
+import { useTheme } from "./ThemeProvider";
 
 export default function Navbar() {
-  const router = useRouter();
   const pathname = usePathname();
-  // Kullanıcı bilgilerini tutacağımız state
-  const [user, setUser] = useState<{ username: string; name: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Tema state'ini ve değiştirme fonksiyonunu alıyoruz
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = Cookies.get("token");
-
-      // Token yoksa hiç backend'i yorma, direkt loading'i bitir
-      if (!token) {
-        setLoading(false);
-        setUser(null);
-        return;
-      }
-
-      try {
-        // Token varsa backend'den kim olduğunu sor
-        const response = await api.get("/users/me");
-        setUser(response.data);
-      } catch (error) {
-        console.error("Oturum süresi dolmuş veya geçersiz token.");
-        setUser(null);
-        // Token patlaksa temizle
-        Cookies.remove("token");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
+    const token = Cookies.get("access_token");
+    setIsLoggedIn(!!token);
   }, [pathname]);
 
   const handleLogout = () => {
-    // Çıkış yaparken token'ı sil ve ana sayfaya/login'e fırlat
-    Cookies.remove("token");
-    setUser(null);
+    Cookies.remove("access_token");
+    setIsLoggedIn(false);
     router.push("/login");
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-
-          {/* Sol Kısım: Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-blue-600 tracking-tight">
-                Kitap<span className="text-gray-800">Paylaş</span>
-              </span>
+    // bg-white yerine bg-theme-card kullandık ki temaya göre otomatik renk alsın
+    <nav className="bg-theme-card shadow-md transition-colors duration-300">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 justify-between items-center">
+          
+          <div className="flex flex-shrink-0 items-center">
+            <Link href="/" className="text-2xl font-bold text-theme-text transition-colors">
+              📚 KitapPaylaş
             </Link>
           </div>
 
-          {/* Sağ Kısım: Kullanıcı İşlemleri */}
-          <div className="flex items-center space-x-4">
-            {loading ? (
-              <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
-            ) : user ? (
-              <>
-                <span className="text-gray-700 font-medium hidden sm:block">
-                  Hoş geldin, <span className="font-bold text-blue-600">{user.username}</span>
-                </span>
+          <div className="flex items-center gap-4">
+            
+            {/* TEMA DEĞİŞTİRME BUTONU */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-theme-bg text-theme-text hover:text-theme-primary transition-all duration-300 shadow-inner border border-theme-border flex items-center justify-center"
+              title="Temayı Değiştir"
+            >
+              {theme === "light" ? (
+                // Ay İkonu
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                // Güneş İkonu
+                <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              )}
+            </button>
 
-                {/* YENİ EKLENEN İLAN EKLE BUTONU */}
-                <Link
-                  href="/ilan-ekle"
-                  className="rounded-md bg-green-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-700 shadow-sm"
-                >
+            {isLoggedIn ? (
+              <>
+                <Link href="/ilan-ekle" className="rounded-md bg-theme-primary px-4 py-2 font-bold text-white transition hover:bg-theme-hover">
                   + İlan Ekle
                 </Link>
-                <Link
-                  href="/profil"
-                  className="text-gray-600 hover:text-blue-600 font-medium px-3 py-2"
-                >
-                  Profilim
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-                >
+                <Link href="/profil" className="text-theme-text hover:text-theme-primary font-medium">Profilim</Link>
+                <button onClick={handleLogout} className="text-red-500 hover:text-red-700 font-medium">
                   Çıkış Yap
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-gray-600 hover:text-blue-600 font-medium px-3 py-2">
-                  Giriş Yap
-                </Link>
-                <Link href="/register" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 shadow-sm">
+                <Link href="/login" className="text-theme-text hover:text-theme-primary font-medium">Giriş Yap</Link>
+                <Link href="/register" className="rounded-md bg-theme-primary px-4 py-2 font-bold text-white transition hover:bg-theme-hover">
                   Kayıt Ol
                 </Link>
               </>
             )}
           </div>
-
         </div>
       </div>
     </nav>

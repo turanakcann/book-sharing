@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <body className={`${inter.className} bg-gray-50 min-h-screen flex flex-col`}>
-        {/* Navbar'ı en tepeye koyuyoruz */}
-        <Navbar />
-        {/* Altındaki her şey sayfanın kendi içeriği olacak */}
-        <div className="flex-grow">
+      <body className={inter.className}>
+        {/* Tüm siteyi ThemeProvider ile sarmalıyoruz */}
+        <ThemeProvider>
+          <Navbar />
           {children}
-        </div>
+        </ThemeProvider>
       </body>
     </html>
   );

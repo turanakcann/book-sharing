@@ -123,7 +123,7 @@ export default function ProfilePage() {
                 <div key={listing.id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border transition ${listing.is_active ? 'border-gray-200 bg-white hover:bg-gray-50' : 'border-gray-200 bg-gray-100 opacity-75'}`}>
                   
                   <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                    <div className="h-16 w-12 bg-gray-200 flex-shrink-0 rounded border">
+                    <div className="h-16 w-12 bg-gray-200 shrink-0 rounded border">
                       {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
                         <img src={listing.book.cover_image_url} alt="" className="h-full w-full object-cover rounded" />
                       ) : (
