@@ -1,85 +1,100 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import api from "@/app/lib/api";
 import Cookies from "js-cookie";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const router = useRouter();
+  // E-posta state'i tamamen kaldırıldı, Username eklendi
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
-      // FastAPI'nin OAuth2 standartları gereği veriyi JSON olarak değil,
-      // URL Form Data (x-www-form-urlencoded) olarak göndermeliyiz.
+      // FastAPI OAuth2PasswordRequestForm standardı
       const formData = new URLSearchParams();
-      formData.append("username", username);
+      formData.append("username", username); // Direkt kullanıcı adını gönderiyoruz
       formData.append("password", password);
 
-      const response = await api.post("/login", formData);
+      const response = await api.post("/login", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
 
-      // Backend'den gelen token'ı 7 günlük çereze kaydet
-      Cookies.set("token", response.data.access_token, { expires: 7 });
-
-      // Başarılı giriş sonrası ana sayfaya fırlat
-      router.push("/");
+      // Token'ı çereze sağlamca kazıyoruz
+      Cookies.set("access_token", response.data.access_token, { expires: 7 });
+      
+      // Navbar'ın uyanması için sayfayı tam yenilemeli yönlendiriyoruz
+      window.location.href = "/";
     } catch (err) {
-      setError("Giriş başarısız. E-posta veya şifrenizi kontrol edin.");
-    } finally {
+      setError("Kullanıcı adı veya şifre hatalı.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h2 className="mb-6 text-center text-3xl font-bold text-gray-800">Giriş Yap</h2>
-        
-        {error && (
-          <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-theme-bg py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <div className="w-full max-w-md bg-theme-card p-10 rounded-3xl border border-theme-border shadow-sm">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-theme-text tracking-tight">Tekrar Hoş Geldin</h2>
+          <p className="mt-2 text-sm font-medium text-theme-muted">
+            Hesabına giriş yap ve kitapları keşfetmeye devam et.
+          </p>
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">E-posta</label>
-            <input
-              type="text"
-              required
-              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Şifre</label>
-            <input
-              type="password"
-              required
-              className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50/50 border border-red-200 text-red-600 text-sm p-3 rounded-xl text-center font-medium">
+              {error}
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-theme-muted mb-1.5 ml-1">Kullanıcı Adı</label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:outline-none focus:border-theme-primary transition-colors"
+                placeholder="Kullanıcı adını gir..."
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-theme-muted mb-1.5 ml-1">Şifre</label>
+              <input
+                type="password"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:outline-none focus:border-theme-primary transition-colors"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-blue-600 py-2 text-white transition hover:bg-blue-700 focus:outline-none disabled:bg-blue-400"
+            className="w-full py-3.5 px-4 bg-theme-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 tracking-wide"
           >
             {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
           </button>
         </form>
+
+        <p className="mt-8 text-center text-sm font-medium text-theme-muted">
+          Henüz hesabın yok mu?{" "}
+          <Link href="/register" className="font-bold text-theme-primary hover:underline">
+            Hemen Kayıt Ol
+          </Link>
+        </p>
       </div>
     </div>
   );

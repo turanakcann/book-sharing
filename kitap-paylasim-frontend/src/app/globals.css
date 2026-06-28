@@ -1,43 +1,43 @@
 @import "tailwindcss";
 
-
+/* TAILWIND v4 YENİ NESİL RENK VE AYAR TANIMLAMASI */
 @theme {
   --color-theme-bg: var(--theme-bg);
   --color-theme-card: var(--theme-card);
   --color-theme-primary: var(--theme-primary);
-  --color-theme-hover: var(--theme-hover);
+  --color-theme-secondary: var(--theme-secondary);
   --color-theme-text: var(--theme-text);
   --color-theme-muted: var(--theme-muted);
   --color-theme-border: var(--theme-border);
 }
 
 @layer base {
-  /* 1. OKYANUS PALETİ (LIGHT THEME) */
+  /* 1. YENİ PREMIUM BOOKLAND PALETİ (LIGHT THEME) */
   :root {
-    --theme-bg: #94A68F;      /* Pride & Prejudice (Mat Adaçayı - Vintage Arkaplan) */
-    --theme-card: #D69E8D;    /* Jane Eyre Rose (Kirli Gül Kurusu - İlan Kartları) */
-    --theme-primary: #D0A54A; /* Gatsby Gold (Hardal Sarısı - Tıklanabilir Butonlar) */
-    --theme-hover: #527446;   /* Frankenstein (Orman Yeşili - Buton Hover Efektleri) */
-    --theme-text: #2A4158;    /* Moby-Dick Navy (Koyu Lacivert - Tok ve Asil Metinler) */
-    --theme-muted: #527446;   /* Frankenstein (Orman Yeşili - İkincil Metinler) */
-    --theme-border: #D0A54A;  /* Gatsby Gold (Hardal Sarısı - Şık Çerçeveler) */
+    --theme-bg: #FDFBF7;        /* Ana Arka Plan: Kırık Beyaz / Krem */
+    --theme-card: #F4F1EA;      /* Yüzey (Kartlar ve Menüler): Açık Vizon */
+    --theme-text: #3E362E;      /* Ana Metin: Acı Kahve */
+    --theme-muted: #857D75;     /* Alt Metin: Soluk Kahve */
+    --theme-primary: #D96C4A;   /* Birincil Buton (Satın Al): Kiremit Kırmızı */
+    --theme-secondary: #ECA72C; /* İkincil Buton (Bağış/Hediye): Hardal Sarısı */
+    --theme-border: #E4DFD6;    /* İnce Çerçeve Rengi */
   }
 
-  /* 2. GECE GÖKYÜZÜ PALETİ (DARK THEME) */
+  /* 2. GECE GÖKYÜZÜ PALETİ (DARK THEME - KORUNDU) */
   .dark {
     --theme-bg: #14151C;
     --theme-card: #1E2A4E;
-    --theme-primary: #48608F;
-    --theme-hover: #8898C5;
     --theme-text: #D6C5D4;
     --theme-muted: #8898C5;
+    --theme-primary: #48608F;
+    --theme-secondary: #8898C5;
     --theme-border: #343335;
   }
+}
 
-  /* Tüm gövdenin varsayılan rengini temaya bağla */
-  body {
-    background-color: var(--theme-bg);
-    color: var(--theme-text);
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+/* Gövde geçiş yumuşatması */
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

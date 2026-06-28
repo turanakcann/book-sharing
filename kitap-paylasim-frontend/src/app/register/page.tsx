@@ -2,156 +2,95 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import api from "@/app/lib/api";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
-  
-  // Tüm form verilerini tek bir merkezde topluyoruz
   const [formData, setFormData] = useState({
-    username: "",
-    name: "",
-    surname: "",
-    email: "",
-    password: "",
-    birth_date: "",
-    city: "",
-    district: "",
+    username: "", email: "", password: "", name: "", surname: "", city: "", district: "",
   });
-
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Inputlara veri girildikçe state'i otomatik güncelleyen dinamik fonksiyon
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
-      // Backend'e tüm objeyi JSON olarak fırlatıyoruz
-      await api.post("/users/register", formData);
-
-      setSuccess(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
-      
+      await api.post("/users/", formData);
+      alert("Kayıt başarılı! Şimdi giriş yapabilirsin.");
+      router.push("/login");
     } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError("Kayıt işlemi başarısız oldu. Lütfen bilgileri kontrol edin.");
-      }
-    } finally {
+      setError(err.response?.data?.detail || "Kayıt işlemi başarısız oldu.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl rounded-lg bg-white p-8 shadow-md">
-        <h2 className="mb-6 text-center text-3xl font-bold text-gray-800">Kayıt Ol</h2>
-        
-        {error && (
-          <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-theme-bg py-12 px-4 transition-colors duration-300">
+      <div className="w-full max-w-2xl bg-theme-card p-10 rounded-3xl border border-theme-border shadow-sm">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-theme-text tracking-tight">Aramıza Katıl</h2>
+          <p className="mt-2 text-sm font-medium text-theme-muted">
+            Bilgilerini doldur ve binlerce kitaba anında eriş.
+          </p>
+        </div>
 
-        {success && (
-          <div className="mb-4 rounded bg-green-100 p-3 text-sm text-green-700">
-            Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...
-          </div>
-        )}
-
-        <form onSubmit={handleRegister} className="space-y-6">
-          {/* Formu 2 Kolona Böldük (MD ekranlardan itibaren) */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            
-            {/* Sol Kolon / Sağ Kolon Elemanları */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Kullanıcı Adı</label>
-              <input type="text" name="username" required placeholder="örn: Ahmet9834"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.username} onChange={handleChange} />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50/50 border border-red-200 text-red-600 text-sm p-3 rounded-xl text-center font-medium">
+              {error}
             </div>
+          )}
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">E-posta</label>
-              <input type="email" name="email" required placeholder="örn: mail@ornek.com"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.email} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Ad</label>
+              <input type="text" name="name" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">Ad</label>
-              <input type="text" name="name" required placeholder="Adınız"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.name} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Soyad</label>
+              <input type="text" name="surname" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">Soyad</label>
-              <input type="text" name="surname" required placeholder="Soyadınız"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.surname} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Kullanıcı Adı</label>
+              <input type="text" name="username" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">Şifre</label>
-              <input type="password" name="password" required minLength={8}
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.password} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">E-posta</label>
+              <input type="email" name="email" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">Doğum Tarihi</label>
-              <input type="date" name="birth_date" required
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.birth_date} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Şifre</label>
+              <input type="password" name="password" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">İl</label>
-              <input type="text" name="city" required placeholder="örn: İzmir"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.city} onChange={handleChange} />
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Şehir</label>
+              <input type="text" name="city" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">İlçe</label>
-              <input type="text" name="district" required placeholder="örn: Bornova"
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-black focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={formData.district} onChange={handleChange} />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">İlçe</label>
+              <input type="text" name="district" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || success}
-            className="mt-6 w-full rounded-md bg-green-600 py-3 text-white font-medium transition hover:bg-green-700 focus:outline-none disabled:bg-green-400"
-          >
-            {loading ? "Kayıt İşlemi Yapılıyor..." : "Kayıt Ol"}
+          <button type="submit" disabled={loading} className="w-full py-3.5 mt-4 bg-theme-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity tracking-wide">
+            {loading ? "Kaydediliyor..." : "Hesap Oluştur"}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm font-medium text-theme-muted">
           Zaten bir hesabın var mı?{" "}
-          <Link href="/login" className="font-medium text-blue-600 hover:underline">
+          <Link href="/login" className="font-bold text-theme-primary hover:underline">
             Giriş Yap
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );

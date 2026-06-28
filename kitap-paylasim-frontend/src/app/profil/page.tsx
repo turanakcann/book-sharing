@@ -28,139 +28,123 @@ export default function ProfilePage() {
   const [myListings, setMyListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Verileri çekme fonksiyonunu dışarı aldık ki silme işleminden sonra sayfayı yenileyebilelim
   const fetchProfileData = async () => {
     try {
       const userRes = await api.get("/users/me");
       setProfile(userRes.data);
-
       const listingsRes = await api.get("/listings/my-listings");
       setMyListings(listingsRes.data);
     } catch (err) {
-      console.error("Profil yüklenirken hata:", err);
+      console.error("Hata:", err);
       router.push("/login");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProfileData();
-  }, [router]);
+  useEffect(() => { fetchProfileData(); }, [router]);
 
-  // --- YENİ EKLENEN SİLME FONKSİYONU ---
   const handleDelete = async (listingId: number) => {
-    const isConfirmed = window.confirm("Bu ilanı kalıcı olarak silmek istediğine emin misin?");
-    if (!isConfirmed) return;
-
+    if (!window.confirm("Bu ilanı kalıcı olarak silmek istediğine emin misin?")) return;
     try {
       await api.delete(`/listings/${listingId}`);
-      // Sildikten sonra listeyi ekrandan anında kaldır (Optimizasyon)
       setMyListings(myListings.filter(l => l.id !== listingId));
     } catch (err) {
-      alert("İlan silinirken bir hata oluştu.");
+      alert("Silinemedi.");
     }
   };
 
-  // --- YENİ EKLENEN DURUM DEĞİŞTİRME FONKSİYONU ---
   const handleToggleStatus = async (listingId: number) => {
     try {
       const res = await api.patch(`/listings/${listingId}/toggle-status`);
-      // Listeyi güncelle (Sadece değişen ilanın is_active durumunu değiştir)
-      setMyListings(myListings.map(l => 
-        l.id === listingId ? { ...l, is_active: res.data.is_active } : l
-      ));
+      setMyListings(myListings.map(l => l.id === listingId ? { ...l, is_active: res.data.is_active } : l));
     } catch (err) {
-      alert("İlan durumu güncellenemedi.");
+      alert("Durum güncellenemedi.");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
-        <div className="h-16 w-16 animate-spin rounded-full border-b-4 border-blue-600"></div>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-theme-bg"><div className="h-10 w-10 animate-spin rounded-full border-b-2 border-theme-primary"></div></div>;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-64px)] bg-theme-bg py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="mx-auto max-w-5xl space-y-8">
         
-        {/* PROFİL KARTI */}
-        <div className="rounded-lg bg-white p-8 shadow-sm border border-gray-200 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-              Hoş geldin, {profile?.name} {profile?.surname}
-            </h1>
-            <p className="text-gray-500 font-medium">@{profile?.username} • {profile?.email}</p>
-            <p className="text-blue-600 font-semibold mt-2">📍 {profile?.city}, {profile?.district}</p>
+        {/* PROFİL KART KÜNYESİ */}
+        <div className="rounded-3xl bg-theme-card p-10 border border-theme-border shadow-sm flex flex-col md:flex-row items-center md:items-start justify-between gap-6 text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="h-24 w-24 rounded-full bg-theme-primary text-white flex items-center justify-center text-4xl font-black shadow-md">
+              {profile?.name.charAt(0)}{profile?.surname.charAt(0)}
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-theme-text tracking-tight mb-1">
+                {profile?.name} {profile?.surname}
+              </h1>
+              <p className="text-theme-muted font-medium mb-3">@{profile?.username} • {profile?.email}</p>
+              <span className="inline-block bg-theme-bg border border-theme-border text-theme-text text-xs font-bold px-3 py-1.5 rounded-lg tracking-wider">
+                📍 {profile?.city}, {profile?.district}
+              </span>
+            </div>
           </div>
-          <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold border-2 border-blue-200">
-            {profile?.name.charAt(0)}{profile?.surname.charAt(0)}
-          </div>
+          <Link href="/ilan-ekle" className="bg-theme-text text-theme-bg font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity">
+            + Yeni İlan
+          </Link>
         </div>
 
-        {/* KULLANICININ İLANLARI */}
-        <div className="rounded-lg bg-white p-8 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-6 border-b pb-4">
-            <h2 className="text-2xl font-bold text-gray-800">Senin İlanların</h2>
-            <span className="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full">
-              Toplam: {myListings.length}
+        {/* İLANLARIM LİSTESİ */}
+        <div className="rounded-3xl bg-theme-card p-10 border border-theme-border shadow-sm">
+          <div className="flex items-center justify-between mb-8 border-b border-theme-border/60 pb-4">
+            <h2 className="text-2xl font-bold text-theme-text">İlanların</h2>
+            <span className="bg-theme-bg border border-theme-border text-theme-muted text-sm font-bold px-4 py-1.5 rounded-full">
+              {myListings.length} Kayıt
             </span>
           </div>
 
           {myListings.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-500 mb-4">Henüz hiç ilan vermemişsin.</p>
-              <Link href="/ilan-ekle" className="rounded-md bg-blue-600 px-4 py-2 text-white font-bold transition hover:bg-blue-700">
-                İlk İlanını Oluştur
-              </Link>
+            <div className="text-center py-12 bg-theme-bg rounded-2xl border border-theme-border/50">
+              <p className="text-theme-muted mb-4 font-medium">Henüz hiç ilan vermemişsin.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {myListings.map((listing) => (
-                <div key={listing.id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border transition ${listing.is_active ? 'border-gray-200 bg-white hover:bg-gray-50' : 'border-gray-200 bg-gray-100 opacity-75'}`}>
+                <div key={listing.id} className={`flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl border transition-all ${listing.is_active ? 'border-theme-border bg-theme-bg' : 'border-theme-border/40 bg-theme-bg/50 opacity-80'}`}>
                   
-                  <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                    <div className="h-16 w-12 bg-gray-200 shrink-0 rounded border">
+                  <div className="flex items-center gap-5 mb-4 sm:mb-0 w-full sm:w-auto">
+                    <div className="h-20 w-14 bg-theme-card flex-shrink-0 rounded-md border border-theme-border/50 overflow-hidden flex items-center justify-center">
                       {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
-                        <img src={listing.book.cover_image_url} alt="" className="h-full w-full object-cover rounded" />
+                        <img src={listing.book.cover_image_url} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs">Foto</div>
+                        <span className="text-xl text-theme-muted">📖</span>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900">{listing.book.title}</h3>
-                      <p className="text-sm text-gray-500">{listing.book.author} • {listing.condition}</p>
+                      <h3 className="font-bold text-theme-text text-lg">{listing.book.title}</h3>
+                      <p className="text-sm font-medium text-theme-muted mb-1">{listing.book.author} • {listing.condition}</p>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${listing.is_active ? "bg-theme-primary/10 text-theme-primary" : "bg-red-100 text-red-600"}`}>
+                        {listing.is_active ? "Yayında" : "Pasife Alındı"}
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <span className="font-bold text-gray-700 mr-2 sm:mr-4">
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <span className="text-xl font-black text-theme-text">
                       {parseFloat(listing.price) > 0 ? `${listing.price} ₺` : "Ücretsiz"}
                     </span>
-                    <span className={`px-2 py-1 text-xs font-bold rounded mr-2 ${listing.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                      {listing.is_active ? "Yayında" : "Pasif"}
-                    </span>
                     
-                    {/* CANLANDIRILMIŞ BUTONLAR */}
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleToggleStatus(listing.id)}
-                        className={`font-medium text-sm px-3 py-1.5 rounded transition ${listing.is_active ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                        className={`text-xs font-bold tracking-wider uppercase px-4 py-2 rounded-lg border transition-all ${listing.is_active ? 'border-theme-secondary text-theme-secondary hover:bg-theme-secondary/10' : 'border-theme-primary text-theme-primary hover:bg-theme-primary/10'}`}
                       >
-                        {listing.is_active ? 'Yayından Kaldır' : 'Tekrar Yayınla'}
+                        {listing.is_active ? 'Dondur' : 'Yayınla'}
                       </button>
                       <button 
                         onClick={() => handleDelete(listing.id)}
-                        className="bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-3 py-1.5 rounded transition"
+                        className="text-xs font-bold tracking-wider uppercase px-4 py-2 rounded-lg text-theme-muted hover:text-red-500 hover:bg-red-50 transition-colors"
                       >
                         Sil
                       </button>
                     </div>
                   </div>
-
                 </div>
               ))}
             </div>

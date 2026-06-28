@@ -16,7 +16,6 @@ interface Owner {
   id: number;
   username: string;
   city: string;
-  district: string;
 }
 
 interface Listing {
@@ -33,7 +32,6 @@ interface Listing {
 export default function Home() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSplash, setShowSplash] = useState(true);
 
@@ -44,13 +42,11 @@ export default function Home() {
         const activeListings = response.data.filter((item: Listing) => item.is_active);
         setListings(activeListings);
       } catch (err) {
-        console.error("İlanlar çekilirken hata:", err);
-        setError("İlanlar yüklenirken bir sorun oluştu.");
+        console.error("Hata:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchListings();
   }, []);
 
@@ -68,133 +64,107 @@ export default function Home() {
       {showSplash ? (
         <SplashScreen onComplete={() => setShowSplash(false)} />
       ) : (
-        /* bg-gray-50 yerine bg-theme-bg */
-        <main className="min-h-[calc(100vh-64px)] bg-theme-bg pb-12 animate-fade-in transition-colors duration-300">
+        <main className="min-h-[calc(100vh-64px)] bg-theme-bg pb-24 transition-colors duration-300">
           
-          {/* HERO BÖLÜMÜ - bg-blue-600 yerine bg-theme-primary */}
-          <div className="bg-theme-primary py-16 px-4 sm:px-6 lg:px-8 shadow-inner mb-10 transition-colors duration-300">
-            <div className="max-w-4xl mx-auto text-center">
-              {/* text-white kalabilir çünkü primary üzerinde her iki temada da beyaz/açık renk şık durur */}
-              <h1 className="text-4xl font-extrabold text-theme-bg sm:text-5xl tracking-tight mb-4">
-                Aradığın Kitabı Keşfet
-              </h1>
-              <p className="text-lg text-theme-bg/80 mb-8 max-w-2xl mx-auto">
-                Binlerce ikinci el kitap, takaslık eserler ve çok daha fazlası. Kitap adı, yazar veya şehir ara.
-              </p>
-              
-              <div className="relative max-w-2xl mx-auto">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-6 w-6 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                {/* Arama Kutusu: bg-white yerine bg-theme-card, text-gray-900 yerine text-theme-text */}
-                <input
-                  type="text"
-                  placeholder="Kitap, yazar veya şehir (Örn: İzmir) ara..."
-                  className="block w-full pl-12 pr-4 py-4 rounded-full bg-theme-card border-2 border-transparent text-theme-text shadow-lg focus:border-theme-hover focus:outline-none text-lg transition-colors"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+          {/* BOOKLAND TARZI BÜYÜK VE CESUR HERO BÖLÜMÜ */}
+          <section className="max-w-4xl mx-auto text-center py-20 px-6">
+            <h1 className="text-5xl md:text-6xl font-black tracking-tight text-theme-text mb-6">
+              Aradığın Kitabı <br />
+              <span className="text-theme-primary">Minimalist</span> Bir Çizgide Keşfet
+            </h1>
+            <p className="text-lg text-theme-muted max-w-2xl mx-auto mb-12 font-medium">
+              Ağır ilan sitelerinden uzak, kitaba değer verenlerin buluşma noktası. Satın al, takas et veya hediyeleş.
+            </p>
+            
+            {/* Sayfa İçi Gömülü Minimalist Arama Çubuğu */}
+            <div className="relative max-w-xl mx-auto">
+              <input
+                type="text"
+                placeholder="Kitap başlığı, yazar veya şehir ara..."
+                className="w-full px-6 py-4 rounded-full bg-theme-card border border-theme-border text-theme-text shadow-sm focus:outline-none focus:border-theme-primary text-base transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </div>
+          </section>
 
-          {/* İLANLAR VİTRİNİ */}
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="text-2xl font-bold text-theme-text">Güncel İlanlar</h2>
-              <span className="text-sm font-medium text-theme-muted">
-                {filteredListings.length} sonuç bulundu
+          {/* BENTO GRID VİTRİN ALANI */}
+          <section className="mx-auto max-w-7xl px-6 sm:px-8">
+            <div className="flex justify-between items-center mb-8 border-b border-theme-border/60 pb-4">
+              <h2 className="text-2xl font-bold tracking-tight text-theme-text">Katalogdaki Eserler</h2>
+              <span className="text-sm font-semibold text-theme-muted bg-theme-card px-3 py-1 rounded-full border border-theme-border">
+                {filteredListings.length} Kitap
               </span>
             </div>
             
-            {error ? (
-              <div className="rounded bg-red-100/10 border border-red-500/50 p-4 text-red-500">{error}</div>
-            ) : filteredListings.length === 0 ? (
-              <div className="rounded-xl bg-theme-card p-12 text-center shadow-sm border border-theme-border transition-colors">
-                <p className="text-xl font-semibold text-theme-text">Aramana uygun kitap bulunamadı.</p>
-                <p className="mt-2 text-theme-muted">Farklı kelimelerle tekrar aramayı dene.</p>
+            {filteredListings.length === 0 ? (
+              <div className="rounded-2xl bg-theme-card p-16 text-center border border-theme-border">
+                <p className="text-lg font-bold text-theme-text">Eser bulunamadı.</p>
+                <p className="text-sm text-theme-muted mt-1">Farklı bir arama yapmayı deneyebilirsin.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              /* Geniş Boşluklu Bento Düzeni (Bento Grid) */
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filteredListings.map((listing) => (
                   <div 
                     key={listing.id} 
-                    className="flex flex-col overflow-hidden rounded-xl bg-theme-card shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-theme-border relative group"
+                    className="flex flex-col rounded-2xl bg-theme-card border border-theme-border p-5 group transition-all duration-300 hover:border-theme-primary shadow-sm hover:shadow-md"
                   >
-                    <div className="absolute top-3 left-3 z-10 rounded-full bg-theme-bg/90 px-3 py-1 text-xs font-bold text-theme-text backdrop-blur-sm shadow-sm border border-theme-border">
-                      {listing.listing_type}
-                    </div>
-
-                    {/* Fotoğraf Alanı */}
-                    <div className="h-56 w-full bg-theme-bg flex items-center justify-center relative border-b border-theme-border p-4 transition-colors">
+                    {/* Kitap Kapak Alanı: Geniş Negative Space ve Havada Süzülen Fotoğraf */}
+                    <div className="h-64 w-full bg-theme-bg rounded-xl flex items-center justify-center p-6 mb-5 relative border border-theme-border/40 overflow-hidden">
                       {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
                         <img 
                           src={listing.book.cover_image_url} 
                           alt={listing.book.title} 
-                          className="h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg"
+                          className="h-full object-contain transform group-hover:scale-105 transition-transform duration-500 drop-shadow-md"
                         />
                       ) : (
-                        <svg className="h-16 w-16 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
+                        <span className="text-3xl">📖</span>
                       )}
+                      
+                      {/* Sol Üst Köşedeki Zarif İlan Tipi Rozeti */}
+                      <span className="absolute top-3 left-3 text-[11px] font-bold tracking-wider uppercase bg-theme-text text-theme-bg px-2.5 py-1 rounded-md">
+                        {listing.listing_type}
+                      </span>
                     </div>
                     
-                    {/* Alt Detaylar */}
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-bold text-theme-text line-clamp-1 flex-1 pr-2">
+                    {/* Kitap Künyesi */}
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex justify-between items-start gap-2 mb-1">
+                        <h3 className="text-lg font-bold tracking-tight text-theme-text line-clamp-1 flex-1">
                           {listing.book.title}
                         </h3>
-                        <span className="text-lg font-black text-theme-primary bg-theme-primary/10 px-2 py-0.5 rounded">
-                          {parseFloat(listing.price) > 0 ? `${listing.price}₺` : "Hediye"}
+                        <span className="text-xl font-black text-theme-primary">
+                          {parseFloat(listing.price) > 0 ? `${listing.price}₺` : "0₺"}
                         </span>
                       </div>
+                      <p className="text-sm font-medium text-theme-muted mb-4">{listing.book.author}</p>
                       
-                      <p className="mb-3 text-sm font-medium text-theme-muted">{listing.book.author}</p>
-                      
-                      <div className="mb-4 flex items-center gap-2">
-                        <span className="rounded bg-theme-bg border border-theme-border px-2 py-1 text-xs font-semibold text-theme-text">
-                          ✨ {listing.condition}
-                        </span>
-                      </div>
-                      
-                      <div className="mt-auto flex items-center justify-between pt-4 border-t border-theme-border/50">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-theme-muted flex items-center gap-1">
-                            👤 {listing.owner.username}
-                          </span>
-                          <span className="text-xs font-bold text-theme-primary flex items-center gap-1 mt-0.5">
-                            📍 {listing.owner.city}
-                          </span>
+                      {/* Kartın Alt Bilgisi */}
+                      <div className="mt-auto pt-4 border-t border-theme-border/40 flex items-center justify-between">
+                        <div className="text-[11px] font-bold text-theme-muted tracking-wide space-y-0.5">
+                          <div>👤 {listing.owner.username}</div>
+                          <div className="text-theme-primary">📍 {listing.owner.city}</div>
                         </div>
+                        
+                        {/* Detaylara ve Satın Almaya Giden Akıllı Link */}
                         <Link 
                           href={`/ilan/${listing.id}`}
-                          className="rounded-lg bg-theme-bg border border-theme-primary px-4 py-2 text-sm font-bold text-theme-primary transition-all hover:bg-theme-primary hover:text-theme-bg"
+                          className="text-xs font-bold tracking-wider uppercase bg-theme-bg border border-theme-border px-4 py-2 rounded-lg text-theme-text hover:bg-theme-text hover:text-theme-bg hover:border-theme-text transition-all"
                         >
-                          İncele
+                          Detaylar →
                         </Link>
                       </div>
                     </div>
+
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </section>
+
         </main>
       )}
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-      `}</style>
     </>
   );
 }
