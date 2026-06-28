@@ -2,80 +2,110 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
-// Tema kontrolcüsünü içeri alıyoruz
 import { useTheme } from "./ThemeProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // Tema state'ini ve değiştirme fonksiyonunu alıyoruz
   const { theme, toggleTheme } = useTheme();
+
+  // Dışarı tıklanınca dropdown'ı kapatma mekanizması
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get("access_token");
     setIsLoggedIn(!!token);
+    setIsDropdownOpen(false); // Sayfa değiştiğinde menüyü kapat
   }, [pathname]);
 
   const handleLogout = () => {
-    Cookies.remove("access_token");
+    // Hem kök dizinden hem de olası alt dizinlerden çerezi siliyoruz
+    Cookies.remove("access_token", { path: '/' });
+    Cookies.remove("access_token"); 
+    
+    // Tarayıcıdaki tüm önbelleği (cache) ve state'leri temizliyoruz
+    localStorage.clear();
+    sessionStorage.clear();
+    
     setIsLoggedIn(false);
-    router.push("/login");
+    setIsDropdownOpen(false);
+    
+    // Tam yenileme yaparak eski kullanıcının verilerini RAM'den siliyoruz
+    window.location.href = "/login";
   };
 
   return (
-    // bg-white yerine bg-theme-card kullandık ki temaya göre otomatik renk alsın
-    <nav className="bg-theme-card shadow-md transition-colors duration-300">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between items-center">
+    // Max-w'yi genişlettik, sağa sola daha çok yaslandı
+    <nav className="bg-theme-card shadow-sm transition-colors duration-300 border-b border-theme-border relative z-50">
+      <div className="mx-auto max-w-[1400px] w-full px-6 md:px-12">
+        <div className="flex h-20 justify-between items-center">
           
-          <div className="flex flex-shrink-0 items-center">
-            <Link href="/" className="text-2xl font-bold text-theme-text transition-colors">
-              📚 KitapPaylaş
+          {/* LOGO */}
+          <div className="flex items-center">
+            <Link href="/" className="text-2xl font-black text-theme-text transition-colors tracking-tight flex items-center gap-2">
+              <span className="text-theme-primary">📚</span> KitapPaylaş
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
-            
+          <div className="flex items-center gap-6">
             {/* TEMA DEĞİŞTİRME BUTONU */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-theme-bg text-theme-text hover:text-theme-primary transition-all duration-300 shadow-inner border border-theme-border flex items-center justify-center"
-              title="Temayı Değiştir"
-            >
-              {theme === "light" ? (
-                // Ay İkonu
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              ) : (
-                // Güneş İkonu
-                <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              )}
+            <button onClick={toggleTheme} className="p-2.5 rounded-full bg-theme-bg text-theme-text hover:text-theme-primary transition-all duration-300 shadow-inner border border-theme-border flex items-center justify-center">
+              {theme === "light" ? "🌙" : "☀️"}
             </button>
 
             {isLoggedIn ? (
-              <>
-                <Link href="/ilan-ekle" className="rounded-md bg-theme-primary px-4 py-2 font-bold text-white transition hover:bg-theme-hover">
-                  + İlan Ekle
-                </Link>
-                <Link href="/profil" className="text-theme-text hover:text-theme-primary font-medium">Profilim</Link>
-                <button onClick={handleLogout} className="text-red-500 hover:text-red-700 font-medium">
-                  Çıkış Yap
+              <div className="relative" ref={dropdownRef}>
+                {/* AVATAR BUTONU */}
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center justify-center h-11 w-11 rounded-full bg-theme-primary text-white font-bold text-lg shadow-md border-2 border-theme-card hover:scale-105 transition-transform"
+                >
+                  KP
                 </button>
-              </>
+
+                {/* AÇILIR MENÜ (DROPDOWN) */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-theme-card border border-theme-border shadow-xl py-2 animate-fade-in origin-top-right">
+                    <div className="px-4 py-3 border-b border-theme-border/50 mb-2">
+                      <p className="text-sm font-medium text-theme-muted">Hoş geldin</p>
+                      <p className="text-sm font-bold text-theme-text truncate">Kitap Kurdu</p>
+                    </div>
+                    
+                    <Link href="/profil" className="flex items-center px-4 py-2.5 text-sm font-bold text-theme-text hover:bg-theme-bg transition-colors">
+                      👤 Profilim
+                    </Link>
+                    <Link href="/kitaplik" className="flex items-center px-4 py-2.5 text-sm font-bold text-theme-text hover:bg-theme-bg transition-colors">
+                      🏛️ Kitaplığım
+                    </Link>
+                    <Link href="/ilan-ekle" className="flex items-center px-4 py-2.5 text-sm font-bold text-theme-primary hover:bg-theme-bg transition-colors">
+                      ➕ İlan Ekle
+                    </Link>
+                    <div className="h-px bg-theme-border/50 my-2"></div>
+                    <button onClick={handleLogout} className="w-full flex items-center px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+                      🚪 Çıkış Yap
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <>
-                <Link href="/login" className="text-theme-text hover:text-theme-primary font-medium">Giriş Yap</Link>
-                <Link href="/register" className="rounded-md bg-theme-primary px-4 py-2 font-bold text-white transition hover:bg-theme-hover">
-                  Kayıt Ol
-                </Link>
-              </>
+              <div className="flex gap-4">
+                <Link href="/login" className="text-theme-text hover:text-theme-primary font-bold px-2 py-2">Giriş Yap</Link>
+                <Link href="/register" className="rounded-xl bg-theme-text text-theme-bg px-5 py-2.5 font-bold transition hover:opacity-80">Kayıt Ol</Link>
+              </div>
             )}
           </div>
         </div>

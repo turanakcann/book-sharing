@@ -7,9 +7,19 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+  
+  // BUG FIX: birth_date (Doğum Tarihi) state'e eklendi!
   const [formData, setFormData] = useState({
-    username: "", email: "", password: "", name: "", surname: "", city: "", district: "",
+    username: "", 
+    email: "", 
+    password: "", 
+    name: "", 
+    surname: "", 
+    birth_date: "", 
+    city: "", 
+    district: "",
   });
+  
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,11 +33,22 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      await api.post("/users/", formData);
+      // BUG FIX: Rota "/users/" yerine "/users/register" olarak düzeltildi!
+      await api.post("/users/register", formData);
       alert("Kayıt başarılı! Şimdi giriş yapabilirsin.");
       router.push("/login");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Kayıt işlemi başarısız oldu.");
+      // Backend'den gelen zeki hata okuma mekanizmamız
+      const detail = err.response?.data?.detail;
+      
+      if (Array.isArray(detail)) {
+        const messages = detail.map((d: any) => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(" | ");
+        setError(`Eksik veya hatalı bilgi: ${messages}`);
+      } else if (typeof detail === "string") {
+        setError(detail); // "Bu e-posta adresi veya kullanıcı adı zaten kayıtlı." hatası buraya düşecek
+      } else {
+        setError("Kayıt işlemi başarısız oldu. Sunucuya ulaşılamıyor.");
+      }
       setLoading(false);
     }
   };
@@ -44,7 +65,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50/50 border border-red-200 text-red-600 text-sm p-3 rounded-xl text-center font-medium">
+            <div className="bg-red-50/50 border border-red-200 text-red-600 text-sm p-3 rounded-xl text-center font-medium animate-fade-in">
               {error}
             </div>
           )}
@@ -70,11 +91,16 @@ export default function RegisterPage() {
               <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Şifre</label>
               <input type="password" name="password" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
+            {/* YENİ EKLENEN DOĞUM TARİHİ ALANI */}
+            <div>
+              <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Doğum Tarihi</label>
+              <input type="date" name="birth_date" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
+            </div>
             <div>
               <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">Şehir</label>
               <input type="text" name="city" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>
-            <div className="md:col-span-2">
+            <div>
               <label className="block text-sm font-bold text-theme-muted mb-1 ml-1">İlçe</label>
               <input type="text" name="district" required className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:border-theme-primary focus:outline-none" onChange={handleChange} />
             </div>

@@ -17,20 +17,26 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    // 1. ZOMBİ TEMİZLİĞİ: İsteği atmadan ÖNCE tarayıcıda eski hesaba dair ne varsa nükleer bombayla yakıyoruz!
+    Cookies.remove("access_token", { path: "/" });
+    Cookies.remove("access_token");
+    localStorage.clear();
+    sessionStorage.clear();
+
     try {
-      // FastAPI OAuth2PasswordRequestForm standardı
       const formData = new URLSearchParams();
-      formData.append("username", username); // Direkt kullanıcı adını gönderiyoruz
-      formData.append("password", password);
+      // auto-fill hatasını önlemek için trim() ile boşlukları siliyoruz
+      formData.append("username", username.trim());
+      formData.append("password", password.trim());
 
       const response = await api.post("/login", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      // Token'ı çereze sağlamca kazıyoruz
-      Cookies.set("access_token", response.data.access_token, { expires: 7 });
+      // 2. TERTEMİZ YENİ TOKEN'I YAZIYORUZ
+      Cookies.set("access_token", response.data.access_token, { expires: 7, path: "/" });
       
-      // Navbar'ın uyanması için sayfayı tam yenilemeli yönlendiriyoruz
+      // 3. HARD REFRESH: Next.js'in önbelleğini kırmak için sayfayı zorla yeniliyoruz
       window.location.href = "/";
     } catch (err) {
       setError("Kullanıcı adı veya şifre hatalı.");
@@ -60,6 +66,7 @@ export default function LoginPage() {
               <label className="block text-sm font-bold text-theme-muted mb-1.5 ml-1">Kullanıcı Adı</label>
               <input
                 type="text"
+                autoComplete="off"
                 required
                 className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:outline-none focus:border-theme-primary transition-colors"
                 placeholder="Kullanıcı adını gir..."
@@ -71,6 +78,7 @@ export default function LoginPage() {
               <label className="block text-sm font-bold text-theme-muted mb-1.5 ml-1">Şifre</label>
               <input
                 type="password"
+                autoComplete="off"
                 required
                 className="w-full px-4 py-3 rounded-xl border border-theme-border bg-theme-bg text-theme-text focus:outline-none focus:border-theme-primary transition-colors"
                 placeholder="••••••••"
