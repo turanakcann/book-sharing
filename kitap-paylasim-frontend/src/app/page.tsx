@@ -29,6 +29,14 @@ interface Listing {
   owner: Owner;
 }
 
+// SİHİRLİ DOKUNUŞ: Fotoğraf URL'sini Backend'e yönlendiren fonksiyon
+const getImageUrl = (path: string | null) => {
+  if (!path || path === "string") return null;
+  if (path.startsWith("http")) return path;
+  const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+  return `http://localhost:8000/${cleanPath}`;
+};
+
 export default function Home() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +74,6 @@ export default function Home() {
       ) : (
         <main className="min-h-[calc(100vh-64px)] bg-theme-bg pb-24 transition-colors duration-300">
           
-          {/* BOOKLAND TARZI BÜYÜK VE CESUR HERO BÖLÜMÜ */}
           <section className="max-w-4xl mx-auto text-center py-20 px-6">
             <h1 className="text-5xl md:text-6xl font-black tracking-tight text-theme-text mb-6">
               Aradığın Kitabı <br />
@@ -76,7 +83,6 @@ export default function Home() {
               Ağır ilan sitelerinden uzak, kitaba değer verenlerin buluşma noktası. Satın al, takas et veya hediyeleş.
             </p>
             
-            {/* Sayfa İçi Gömülü Minimalist Arama Çubuğu */}
             <div className="relative max-w-xl mx-auto">
               <input
                 type="text"
@@ -88,7 +94,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* BENTO GRID VİTRİN ALANI */}
           <section className="mx-auto max-w-7xl px-6 sm:px-8">
             <div className="flex justify-between items-center mb-8 border-b border-theme-border/60 pb-4">
               <h2 className="text-2xl font-bold tracking-tight text-theme-text">Katalogdaki Eserler</h2>
@@ -103,18 +108,16 @@ export default function Home() {
                 <p className="text-sm text-theme-muted mt-1">Farklı bir arama yapmayı deneyebilirsin.</p>
               </div>
             ) : (
-              /* Geniş Boşluklu Bento Düzeni (Bento Grid) */
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filteredListings.map((listing) => (
                   <div 
                     key={listing.id} 
                     className="flex flex-col rounded-2xl bg-theme-card border border-theme-border p-5 group transition-all duration-300 hover:border-theme-primary shadow-sm hover:shadow-md"
                   >
-                    {/* Kitap Kapak Alanı: Geniş Negative Space ve Havada Süzülen Fotoğraf */}
                     <div className="h-64 w-full bg-theme-bg rounded-xl flex items-center justify-center p-6 mb-5 relative border border-theme-border/40 overflow-hidden">
                       {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
                         <img 
-                          src={listing.book.cover_image_url} 
+                          src={getImageUrl(listing.book.cover_image_url) as string} 
                           alt={listing.book.title} 
                           className="h-full object-contain transform group-hover:scale-105 transition-transform duration-500 drop-shadow-md"
                         />
@@ -122,13 +125,11 @@ export default function Home() {
                         <span className="text-3xl">📖</span>
                       )}
                       
-                      {/* Sol Üst Köşedeki Zarif İlan Tipi Rozeti */}
                       <span className="absolute top-3 left-3 text-[11px] font-bold tracking-wider uppercase bg-theme-text text-theme-bg px-2.5 py-1 rounded-md">
                         {listing.listing_type}
                       </span>
                     </div>
                     
-                    {/* Kitap Künyesi */}
                     <div className="flex-1 flex flex-col">
                       <div className="flex justify-between items-start gap-2 mb-1">
                         <h3 className="text-lg font-bold tracking-tight text-theme-text line-clamp-1 flex-1">
@@ -140,14 +141,12 @@ export default function Home() {
                       </div>
                       <p className="text-sm font-medium text-theme-muted mb-4">{listing.book.author}</p>
                       
-                      {/* Kartın Alt Bilgisi */}
                       <div className="mt-auto pt-4 border-t border-theme-border/40 flex items-center justify-between">
                         <div className="text-[11px] font-bold text-theme-muted tracking-wide space-y-0.5">
                           <div>👤 {listing.owner.username}</div>
                           <div className="text-theme-primary">📍 {listing.owner.city}</div>
                         </div>
                         
-                        {/* Detaylara ve Satın Almaya Giden Akıllı Link */}
                         <Link 
                           href={`/ilan/${listing.id}`}
                           className="text-xs font-bold tracking-wider uppercase bg-theme-bg border border-theme-border px-4 py-2 rounded-lg text-theme-text hover:bg-theme-text hover:text-theme-bg hover:border-theme-text transition-all"

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.core.security import get_password_hash
 from app.api.deps import get_current_user
 
@@ -53,4 +53,25 @@ def read_user_me(current_user: User = Depends(get_current_user)):
     
     # Gelen token get_current_user fonksiyonundan geçti, onaylandı ve bize 
     # doğrudan o kullanıcı nesnesi olarak geldi. Sadece geri döndürüyoruz.
+    return current_user
+
+
+@router.put("/me", response_model=UserUpdate)
+def update_user_me(
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if user_update.name is not None:
+        current_user.name = user_update.name
+    if user_update.surname is not None:
+        current_user.surname = user_update.surname
+    if user_update.city is not None:
+        current_user.city = user_update.city
+    if user_update.district is not None:
+        current_user.district = user_update.district
+        
+    db.commit()
+    db.refresh(current_user)
+    
     return current_user

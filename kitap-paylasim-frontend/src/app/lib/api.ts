@@ -2,15 +2,26 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
+  // Backend URL'imiz
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
 });
 
-api.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// REQUEST INTERCEPTOR (Gümrük Memuru)
+api.interceptors.request.use(
+  (config) => {
+    // İŞTE SİHİRLİ DÜZELTME: "token" yerine "access_token" okuyoruz!
+    const token = Cookies.get("access_token");
+    
+    // Token varsa Authorization başlığına çak
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;

@@ -14,6 +14,14 @@ interface Listing {
   owner: { username: string; email: string; name: string; surname: string; city: string; district: string };
 }
 
+// SİHİRLİ DOKUNUŞ: Fotoğraf URL'sini Backend'e yönlendiren fonksiyon
+const getImageUrl = (path: string | null) => {
+  if (!path || path === "string") return null;
+  if (path.startsWith("http")) return path;
+  const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+  return `http://localhost:8000/${cleanPath}`;
+};
+
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -48,7 +56,11 @@ export default function ListingDetailPage() {
             {listing.listing_type}
           </span>
           {listing.book.cover_image_url && listing.book.cover_image_url !== "string" ? (
-            <img src={listing.book.cover_image_url} alt="" className="max-h-[400px] object-contain drop-shadow-2xl animate-fade-in" />
+            <img 
+              src={getImageUrl(listing.book.cover_image_url) as string} 
+              alt="" 
+              className="max-h-[400px] object-contain drop-shadow-2xl animate-fade-in" 
+            />
           ) : (
             <span className="text-6xl">📖</span>
           )}
@@ -69,7 +81,6 @@ export default function ListingDetailPage() {
               </span>
             </div>
 
-            {/* Kitap Teknik Özellik Tablosu */}
             <div className="border-t border-b border-theme-border/60 py-4 space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-theme-muted font-medium">Sayfa Sayısı</span><span className="font-bold text-theme-text">{listing.book.page_count}</span></div>
               <div className="flex justify-between"><span className="text-theme-muted font-medium">Basım Yılı</span><span className="font-bold text-theme-text">{listing.book.published_year}</span></div>
@@ -77,20 +88,17 @@ export default function ListingDetailPage() {
             </div>
           </div>
 
-          {/* İLAN SAHİBİ BİLGİ KARTU */}
           <div className="bg-theme-bg border border-theme-border p-5 rounded-xl space-y-2">
             <h4 className="font-bold text-sm tracking-wider uppercase text-theme-text">👤 Kitap Sahibi</h4>
             <p className="text-sm text-theme-muted font-medium">Ad Soyad: <span className="text-theme-text font-bold">{listing.owner.name} {listing.owner.surname}</span></p>
             <p className="text-sm text-theme-muted font-medium">Konum: <span className="text-theme-primary font-bold">{listing.owner.city}, {listing.owner.district}</span></p>
           </div>
 
-          {/* İLAN AÇIKLAMA BİLGİ KARTI */}
           <div className="bg-theme-bg border border-theme-border p-5 rounded-xl space-y-2">
             <h5 className="font-bold text-sm tracking-wider uppercase text-theme-text">Açıklama</h5>
             <p className="text-sm text-theme-muted font-medium">{listing.description}</p>
           </div>
 
-          {/* E-TİCARET BUTONLARI (KİREMİT VE HARDAL SARI) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {parseFloat(listing.price) > 0 && (
               <a 

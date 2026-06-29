@@ -13,9 +13,17 @@ interface BookData {
   condition: string;
   description: string;
   isbn: string;
-  created_at: string; // Yükleme tarihi
+  created_at: string;
   cover_image_url: string | null;
 }
+
+// SİHİRLİ DOKUNUŞ: Fotoğraf URL'sini Backend'e yönlendiren fonksiyon
+const getImageUrl = (path: string | null) => {
+  if (!path || path === "string") return null;
+  if (path.startsWith("http")) return path;
+  const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+  return `http://localhost:8000/${cleanPath}`;
+};
 
 export default function LibraryDashboard() {
   const [books, setBooks] = useState<BookData[]>([]);
@@ -30,12 +38,11 @@ export default function LibraryDashboard() {
   const [pomodoroMinutes, setPomodoroMinutes] = useState(25);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // Veri Çekme (Şimdilik ilanlar endpoint'inden çekiyoruz)
+  // Veri Çekme
   useEffect(() => {
     const fetchMyLibrary = async () => {
       try {
         const res = await api.get("/listings/my-listings");
-        // Gelen veriyi kitap şemasına mapliyoruz
         const mappedBooks = res.data.map((l: any) => ({
           id: l.book.id,
           title: l.book.title,
@@ -44,7 +51,7 @@ export default function LibraryDashboard() {
           condition: l.condition,
           description: l.book.description || l.description,
           isbn: l.book.isbn !== "string" ? l.book.isbn : "",
-          created_at: new Date().toLocaleDateString("tr-TR"), // Backend'den tarih gelmiyorsa bugünü baz aldık
+          created_at: new Date().toLocaleDateString("tr-TR"),
           cover_image_url: l.book.cover_image_url !== "string" ? l.book.cover_image_url : null,
         }));
         setBooks(mappedBooks);
@@ -85,7 +92,6 @@ export default function LibraryDashboard() {
   const handleBookClick = (book: BookData) => {
     setSelectedBook(book);
     setIsAnimating(true);
-    // 2 saniyelik sinematik animasyon bekleme süresi
     setTimeout(() => setIsAnimating(false), 2000);
   };
 
@@ -98,7 +104,6 @@ export default function LibraryDashboard() {
         <div className="bg-theme-bg rounded-2xl p-6 border border-theme-border text-center mb-6 shadow-inner relative group">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-theme-muted uppercase tracking-widest">⏱️ Pomodoro</h3>
-            {/* Dakika Ayarlama Kutusu */}
             <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
               <input
                 type="number"
@@ -138,7 +143,7 @@ export default function LibraryDashboard() {
           </div>
         </div>
 
-        {/* MİNİ TAKVİM (Görsel) */}
+        {/* MİNİ TAKVİM */}
         <div className="bg-theme-bg rounded-2xl p-5 border border-theme-border mb-6">
           <h3 className="text-sm font-bold text-theme-text mb-3">🗓️ Bugün</h3>
           <div className="flex justify-between items-center bg-theme-card p-3 rounded-xl border border-theme-border/50">
@@ -188,7 +193,8 @@ export default function LibraryDashboard() {
               >
                 <div className="h-10 w-8 bg-theme-card rounded border border-theme-border overflow-hidden flex-shrink-0 flex items-center justify-center">
                   {book.cover_image_url ? (
-                    <img src={book.cover_image_url} className="w-full h-full object-cover" alt="" />
+                    // FOTOĞRAF DÜZELTMESİ (getImageUrl Eklendi)
+                    <img src={getImageUrl(book.cover_image_url) as string} className="w-full h-full object-cover" alt="" />
                   ) : (
                     <span className="text-[10px] m-1">📖</span>
                   )}
@@ -211,14 +217,11 @@ export default function LibraryDashboard() {
           Dijital Kitaplığın
         </h2>
 
-        {/* Kitaplık Rafları Sahnemiz */}
+        {/* Kitaplık Rafları */}
         <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col gap-12 relative z-10">
           {[1, 2, 3].map((shelf) => (
             <div key={shelf} className="relative flex items-end px-12 pb-4">
-              {/* Rafın Kendisi (Tahta Görünümü) */}
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#8B5A2B] rounded shadow-[0_10px_20px_rgba(0,0,0,0.2)] border-b-2 border-[#5C3A21]"></div>
-
-              {/* Kitaplar (Sırayla Raflara Dizilir) */}
               <div className="flex gap-2 relative z-10 w-full overflow-hidden">
                 {sortedBooks.slice((shelf - 1) * 8, shelf * 8).map((book) => (
                   <div
@@ -240,11 +243,10 @@ export default function LibraryDashboard() {
         </div>
       </main>
 
-      {/* SİNEMATİK MODAL (Kitap Tıklandığında Açılan Ekran) */}
+      {/* SİNEMATİK MODAL */}
       {selectedBook && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           {isAnimating ? (
-            // AÇILIŞ ANİMASYONU
             <div
               className="w-48 h-64 bg-theme-primary rounded-r-xl shadow-2xl flex items-center justify-center border-l-4 border-theme-text transform transition-all duration-[1500ms] animate-book-open"
               style={{ perspective: "1000px" }}
@@ -254,7 +256,6 @@ export default function LibraryDashboard() {
               </div>
             </div>
           ) : (
-            // KİTAP KÜNYESİ (Animasyon bitince gösterilir)
             <div className="bg-theme-card max-w-2xl w-full rounded-3xl p-8 relative shadow-2xl border border-theme-border animate-fade-in flex flex-col md:flex-row gap-8">
               <button
                 onClick={() => setSelectedBook(null)}
@@ -265,8 +266,9 @@ export default function LibraryDashboard() {
 
               <div className="w-full md:w-1/3 bg-theme-bg rounded-2xl border border-theme-border p-4 flex items-center justify-center">
                 {selectedBook.cover_image_url ? (
+                  // FOTOĞRAF DÜZELTMESİ (getImageUrl Eklendi)
                   <img
-                    src={selectedBook.cover_image_url}
+                    src={getImageUrl(selectedBook.cover_image_url) as string}
                     className="w-full object-contain rounded drop-shadow-md"
                     alt={selectedBook.title}
                   />

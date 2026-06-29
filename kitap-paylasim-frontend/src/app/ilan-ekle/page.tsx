@@ -77,7 +77,7 @@ export default function AddListingPage() {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      await api.post(`/books/${createdBookId}/cover`, formData, {
+      await api.post(`/books/${createdBookId}/upload-cover`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setStep(3);

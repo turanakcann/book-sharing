@@ -51,7 +51,7 @@ app.include_router(books.router, prefix="/api/v1/books", tags=["Books"])
 app.include_router(listings.router, prefix="/api/v1/listings", tags=["Listings"])
 app.include_router(requests.router, prefix="/api/v1/requests", tags=["Requests"])
 app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["Reviews"])
-app.mount("/static", StaticFiles(directory="uploads"), name="static")
+app.mount("/static", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def read_root():

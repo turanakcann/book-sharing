@@ -25,3 +25,9 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True # SQLAlchemy ORM modelini otomatik olarak Pydantic JSON nesnesine çevirmek için kritik!
+        
+class UserUpdate(BaseModel):
+    name: str | None = None
+    surname: str | None = None
+    city: str | None = None
+    district: str | None = None
